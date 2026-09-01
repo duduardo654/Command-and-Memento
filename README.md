@@ -25,14 +25,14 @@ Imagine que você vai a um restaurante jantar:
 ### 💡 Por que isso é incrível em Python?
 Em Python, as funções são objetos de primeira classe (podem ser passadas como argumentos, guardadas em listas, etc.). No entanto, para sistemas complexos que precisam de **histórico e reversão**, encapsular ações em **classes de Comando** é a escolha ideal:
 
-* **Desacoplamento Total:** O botão de clique da interface visual (GUI) não precisa saber o que é um banco de dados ou como salvar um arquivo [4]. Ele apenas recebe um objeto de comando e chama o método `.execute()` dele [6, 10].
+* **Desacoplamento Total:** O botão de clique da interface visual (GUI) não precisa saber o que é um banco de dados ou como salvar um arquivo. Ele apenas recebe um objeto de comando e chama o método `.execute()` dele.
 * **Flexibilidade Dinâmica:** Você pode facilmente enfileirar comandos em uma `list` ou `queue.Queue` do Python para execução tardia, ou até mesmo enviá-los de forma assíncrona.
 
 ---
 
 ## 🎮 2. O Padrão Memento: A Analogia do "Save State"
 
-O padrão **Memento** permite **capturar e salvar o estado interno de um objeto** para que ele possa ser restaurado no futuro, tudo isso sem violar o encapsulamento (sem expor as variáveis privadas do objeto) [25, 38].
+O padrão **Memento** permite **capturar e salvar o estado interno de um objeto** para que ele possa ser restaurado no futuro, tudo isso sem violar o encapsulamento (sem expor as variáveis privadas do objeto).
 
 ### 📌 A Analogia do Mundo Real
 Pense em um videogame retrô extremamente difícil:
