@@ -1,20 +1,21 @@
 """
-Caretaker
-=========
-Guarda os checkpoints (mementos) com um rótulo, sem conhecer os
-detalhes internos do Document (Originator). Só armazena e devolve.
+PresetManager (Caretaker)
+==========================
+Guarda os "presets" (mementos) com um nome, tipo "Modo Filme" ou
+"Modo Jogo". Não conhece os detalhes internos da TV, só armazena e
+devolve os snapshots quando pedido.
 """
 
-from memento.memento import DocumentMemento
+from memento.memento import TVMemento
 
 
-class Caretaker:
+class PresetManager:
     def __init__(self):
-        self._checkpoints: dict[str, DocumentMemento] = {}
+        self._presets: dict[str, TVMemento] = {}
 
-    def save_checkpoint(self, name: str, memento: DocumentMemento) -> None:
-        self._checkpoints[name] = memento
-        print(f"  [Memento] checkpoint '{name}' salvo -> {memento.get_state()!r}")
+    def salvar_preset(self, nome: str, memento: TVMemento) -> None:
+        self._presets[nome] = memento
+        print(f"  [Memento] preset '{nome}' salvo -> canal {memento.canal}, volume {memento.volume}")
 
-    def get_checkpoint(self, name: str) -> DocumentMemento:
-        return self._checkpoints[name]
+    def obter_preset(self, nome: str) -> TVMemento:
+        return self._presets[nome]

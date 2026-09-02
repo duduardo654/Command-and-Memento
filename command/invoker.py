@@ -1,30 +1,35 @@
 """
-Editor (Invoker)
-================
-Dispara comandos e mantém o histórico deles, para permitir undo.
-Não conhece a lógica interna de cada comando nem do Document
-(o Receiver) — só chama execute()/undo().
+RemoteControl (Invoker)
+========================
+Este é o Invoker do padrão Command: o controle remoto em si.
+
+Ele NÃO sabe como ligar a TV, mudar volume ou canal — ele só guarda uma
+referência a um Command e, quando um "botão" é pressionado, chama
+command.execute(). Isso é o desacoplamento clássico do padrão: o
+RemoteControl poderia controlar uma TV, um som ou qualquer outro
+Receiver, desde que receba os Commands certos.
+
+Além disso, ele mantém um histórico de comandos executados para permitir
+"desfazer" (undo) a última ação apertada.
 """
 
 from typing import List
-from document import Document
 from command.commands import Command
 
 
-class Editor:
-    def __init__(self, document: Document):
-        self.document = document
-        self._history: List[Command] = []
+class RemoteControl:
+    def __init__(self):
+        self._historico: List[Command] = []
 
-    def run(self, command: Command) -> None:
+    def pressionar_botao(self, command: Command) -> None:
+        """Aperta um botão do controle: executa o Command associado."""
         command.execute()
-        self._history.append(command)
-        print(f"  [Command] executado -> {self.document}")
+        self._historico.append(command)
 
-    def undo_last(self) -> None:
-        if not self._history:
-            print("  [Command] nada para desfazer")
+    def pressionar_desfazer(self) -> None:
+        """Aperta o botão de 'desfazer' do controle."""
+        if not self._historico:
+            print("  [Invoker] nenhum comando para desfazer")
             return
-        command = self._history.pop()
-        command.undo()
-        print(f"  [Command] undo -> {self.document}")
+        ultimo_comando = self._historico.pop()
+        ultimo_comando.undo()

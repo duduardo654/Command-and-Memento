@@ -1,52 +1,68 @@
 """
 Client
 ======
-Monta os objetos e demonstra os dois padrões em conjunto:
+Monta os objetos e demonstra os dois padrões em conjunto, com o
+RemoteControl (Invoker) bem separado da TV (Receiver) e dos Commands.
 
-  COMMAND -> Editor (Invoker) executa TypeCommand/DeleteCommand sobre o
-             Document (Receiver) e consegue desfazer a última ação.
+  COMMAND -> o Client cria os Commands (TurnOnCommand, VolumeUpCommand...)
+             e os "entrega" para o RemoteControl (Invoker) apertar. O
+             RemoteControl não sabe o que cada botão faz de verdade —
+             só chama command.execute() / undo().
 
-  MEMENTO -> Document (Originator) cria/restaura snapshots (DocumentMemento)
-             guardados pelo Caretaker, permitindo voltar a um checkpoint
-             completo salvo manualmente, independente do histórico de comandos.
+  MEMENTO -> a TV (Originator) sabe salvar/restaurar seu próprio estado
+             (canal + volume). O PresetManager (Caretaker) guarda esses
+             estados com um nome, sem entender o conteúdo.
 
-Execute a partir da pasta editor_patterns:
+Execute a partir da pasta tv_remote_patterns:
     python main.py
 """
 
-from document import Document
-from command.invoker import Editor
-from command.commands import TypeCommand, DeleteCommand
-from memento.caretaker import Caretaker
+from tv import TV
+from command.invoker import RemoteControl
+from command.commands import (
+    TurnOnCommand,
+    TurnOffCommand,
+    VolumeUpCommand,
+    VolumeDownCommand,
+    ChangeChannelCommand,
+)
+from memento.caretaker import PresetManager
 
 
 def main():
-    doc = Document()
-    editor = Editor(doc)
-    caretaker = Caretaker()
+    tv = TV()
+    remote = RemoteControl()
+    presets = PresetManager()
 
-    print("== 1) COMMAND: digitando com histórico de undo ==")
-    editor.run(TypeCommand(doc, "Ola"))
-    editor.run(TypeCommand(doc, ", mundo"))
-    editor.run(TypeCommand(doc, "!!!"))
+    print("== 1) COMMAND: apertando botões do controle remoto ==")
+    remote.pressionar_botao(TurnOnCommand(tv))
+    print(f"  [Invoker] botão LIGAR pressionado -> {tv}")
 
-    print("\n-- desfazendo a última ação (Command.undo) --")
-    editor.undo_last()   # remove "!!!"
-    editor.undo_last()   # remove ", mundo"
+    remote.pressionar_botao(ChangeChannelCommand(tv, 8))
+    print(f"  [Invoker] botão CANAL+8 pressionado -> {tv}")
 
-    print("\n== 2) MEMENTO: salvando um checkpoint do estado atual ==")
-    caretaker.save_checkpoint("depois_do_ola", doc.save())
+    remote.pressionar_botao(VolumeUpCommand(tv))
+    remote.pressionar_botao(VolumeUpCommand(tv))
+    print(f"  [Invoker] botão VOLUME+ pressionado 2x -> {tv}")
 
-    print("\n-- continuando a editar normalmente --")
-    editor.run(TypeCommand(doc, ", Python"))
-    editor.run(DeleteCommand(doc, 7))          # apaga ", Python"
-    editor.run(TypeCommand(doc, " e Patterns!"))
+    print("\n-- apertando o botão de desfazer (Command.undo) --")
+    remote.pressionar_desfazer()
+    print(f"  [Invoker] após 1x DESFAZER -> {tv}")
+    remote.pressionar_desfazer()
+    print(f"  [Invoker] após 2x DESFAZER -> {tv}")
 
-    print(f"\nEstado atual do documento: {doc}")
+    print("\n== 2) MEMENTO: salvando um preset com o estado atual ==")
+    presets.salvar_preset("Modo Filme", tv.save())
 
-    print("\n-- restaurando para o checkpoint salvo (Memento.restore) --")
-    doc.restore(caretaker.get_checkpoint("depois_do_ola"))
-    print(f"Estado após restaurar checkpoint: {doc}")
+    print("\n-- continuando a usar a TV normalmente --")
+    remote.pressionar_botao(ChangeChannelCommand(tv, 25))
+    remote.pressionar_botao(VolumeDownCommand(tv))
+    remote.pressionar_botao(VolumeDownCommand(tv))
+    print(f"  estado atual -> {tv}")
+
+    print("\n-- restaurando o preset salvo (Memento.restore) --")
+    tv.restore(presets.obter_preset("Modo Filme"))
+    print(f"  após restaurar 'Modo Filme' -> {tv}")
 
 
 if __name__ == "__main__":
